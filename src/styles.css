@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  font-family: 'Inter', sans-serif;
+  color: #e8e0d2;
+  background: #11100f;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+
+  --bg-main: #11100f;
+  --bg-panel: #1b1917;
+  --bg-card: #211e1b;
+  --gold: #c5a15b;
+  --gold-light: #e0c27e;
+  --text-main: #e8e0d2;
+  --text-muted: #a39a8c;
+  --border: #393127;
+  --violet: #7561a8;
+  --red: #8f4141;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--bg-main);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+main {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(111, 77, 43, 0.13), transparent 55%),
+    var(--bg-main);
+}
+
+h1 {
+  margin: 0 0 12px;
+  color: var(--gold-light);
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2.2rem, 8vw, 4rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+::selection {
+  color: #11100f;
+  background: var(--gold-light);
+}
+
+@media (max-width: 600px) {
+  main {
+    padding: 24px 16px;
+  }
+
+  p {
+    font-size: 0.9rem;
+  }
+}

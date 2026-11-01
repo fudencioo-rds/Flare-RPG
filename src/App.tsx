@@ -632,8 +632,7 @@ export default function App() {
                       {systems.map((system) => (
                         <article className="system-card" key={system.id}>
                           <div className="system-card-icon">✧</div>
-                          <div clas
-sName="system-card-content">
+                          <div className="system-card-content">
                             <div className="system-card-title">
                               <h2>{system.name}</h2>
                               <span
@@ -1043,5 +1042,5 @@ function OverviewCard({
       <span className="overview-link">Acessar →</span>
     </button>
   );
-                          }
+                          
                               

@@ -2144,3 +2144,232 @@ p {
     gap: 6px;
   }
   }
+
+/* =====================================
+   FLARE RPG - CRIADOR DE SISTEMAS V0.3
+   ===================================== */
+
+.builder-progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin: 25px 0 9px;
+  color: #a99a81;
+  font-size: 10px;
+}
+
+.builder-progress-info strong {
+  color: var(--gold-light);
+}
+
+.builder-progress-track {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: #30291f;
+}
+
+.builder-progress-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #8c6d37, #d2b477);
+  transition: width 0.25s ease;
+}
+
+.builder-step-nav {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding: 17px 0 20px;
+  scrollbar-width: thin;
+  scrollbar-color: #685333 transparent;
+}
+
+.builder-step-nav button {
+  min-width: 65px;
+  min-height: 59px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 7px;
+  color: #766d60;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: #191713;
+  cursor: pointer;
+}
+
+.builder-step-nav button span {
+  font-family: "Cinzel", serif;
+  font-size: 12px;
+}
+
+.builder-step-nav button small {
+  max-width: 75px;
+  font-size: 8px;
+  text-align: center;
+}
+
+.builder-step-nav button.current {
+  color: var(--gold-light);
+  border-color: rgba(185, 154, 91, 0.55);
+  background: rgba(185, 154, 91, 0.1);
+}
+
+.builder-step-nav button.completed {
+  color: #a6b18e;
+  border-color: rgba(166, 177, 142, 0.25);
+}
+
+.builder-form {
+  margin-top: 10px;
+}
+
+.builder-form .form-heading {
+  align-items: flex-start;
+}
+
+.builder-form .form-heading > div {
+  min-width: 0;
+}
+
+.builder-form .form-heading p {
+  margin: 6px 0 0;
+  color: #82796d;
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.builder-fields {
+  display: grid;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.builder-textarea {
+  min-height: 180px;
+  resize: vertical;
+  line-height: 1.8;
+}
+
+.builder-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.builder-navigation button {
+  min-width: 135px;
+}
+
+.builder-navigation button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.builder-review {
+  display: grid;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.builder-review > div:first-child {
+  padding: 22px;
+  border: 1px solid rgba(185, 154, 91, 0.25);
+  border-radius: 4px;
+  background: linear-gradient(145deg, #211d17, #191613);
+}
+
+.builder-review > div:first-child > span {
+  color: var(--gold);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+
+.builder-review h3 {
+  margin: 12px 0 7px;
+  color: #e7dece;
+  font-family: "Cinzel", serif;
+  font-size: 21px;
+  font-weight: 500;
+}
+
+.builder-review p {
+  color: #938879;
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.builder-review > div:first-child small {
+  color: #b19a6b;
+  font-size: 9px;
+}
+
+.review-section {
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: #1a1814;
+}
+
+.review-section > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.review-section strong {
+  color: #d2c5ae;
+  font-size: 10px;
+}
+
+.review-section button {
+  padding: 5px 9px;
+  color: var(--gold-light);
+  border: 1px solid rgba(185, 154, 91, 0.25);
+  border-radius: 3px;
+  background: transparent;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.review-section p {
+  margin: 9px 0 0;
+  color: #81786c;
+  font-size: 9px;
+}
+
+.system-configured {
+  display: block;
+  margin-top: 10px;
+  color: #a89a77;
+  font-size: 9px;
+}
+
+@media (max-width: 600px) {
+  .builder-step-nav {
+    margin-right: -4px;
+    padding-bottom: 14px;
+  }
+
+  .builder-step-nav button {
+    min-width: 60px;
+  }
+
+  .builder-navigation {
+    flex-direction: column-reverse;
+  }
+
+  .builder-navigation button {
+    width: 100%;
+  }
+
+  .builder-textarea {
+    min-height: 150px;
+  }
+}

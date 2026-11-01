@@ -1,3 +1,5 @@
+TypeScript
+
 import { useEffect, useState, type FormEvent } from "react";
 
 type Section =
@@ -9,6 +11,22 @@ type Section =
   | "biblioteca"
   | "configuracoes";
 
+type BuilderData = {
+  attributes: string;
+  skills: string;
+  diceRules: string;
+  tests: string;
+  resources: string;
+  races: string;
+  classes: string;
+  abilities: string;
+  progression: string;
+  combat: string;
+  conditions: string;
+  equipment: string;
+  review: string;
+};
+
 type RPGSystem = {
   id: string;
   name: string;
@@ -17,6 +35,21 @@ type RPGSystem = {
   dice: string;
   visibility: "Privado" | "Público";
   createdAt: string;
+  builder?: BuilderData;
+};
+
+type BuilderField = {
+  key: keyof BuilderData;
+  label: string;
+  placeholder: string;
+  hint: string;
+};
+
+type BuilderStep = {
+  title: string;
+  subtitle: string;
+  description: string;
+  fields: BuilderField[];
 };
 
 const STORAGE_KEY = "flare-rpg-systems";
@@ -55,6 +88,188 @@ const diceOptions = [
   "Personalizado",
 ];
 
+const emptyBuilder: BuilderData = {
+  attributes: "",
+  skills: "",
+  diceRules: "",
+  tests: "",
+  resources: "",
+  races: "",
+  classes: "",
+  abilities: "",
+  progression: "",
+  combat: "",
+  conditions: "",
+  equipment: "",
+  review: "",
+};
+
+const builderSteps: BuilderStep[] = [
+  {
+    title: "Atributos e características",
+    subtitle: "ETAPA 02 · FUNDAMENTOS",
+    description:
+      "Defina as características que representam as capacidades dos personagens.",
+    fields: [
+      {
+        key: "attributes",
+        label: "Atributos",
+        placeholder:
+          "Força: capacidade física e potência muscular\nDestreza: agilidade e coordenação\nInteligência: raciocínio e conhecimento\nConstituição: resistência e vigor",
+        hint: "Escreva um atributo por linha. Você pode explicar sua função.",
+      },
+    ],
+  },
+  {
+    title: "Perícias e especializações",
+    subtitle: "ETAPA 03 · COMPETÊNCIAS",
+    description:
+      "Configure os conhecimentos, treinamentos e especializações dos personagens.",
+    fields: [
+      {
+        key: "skills",
+        label: "Perícias",
+        placeholder:
+          "Acrobacia: movimentos e equilíbrio\nInvestigação: procurar pistas\nPersuasão: convencer outras pessoas\nSobrevivência: enfrentar ambientes hostis",
+        hint: "Uma perícia por linha. Inclua descrições ou atributos relacionados.",
+      },
+    ],
+  },
+  {
+    title: "Dados e testes",
+    subtitle: "ETAPA 04 · RESOLUÇÃO",
+    description:
+      "Explique como funcionam as rolagens, dificuldades e resultados das ações.",
+    fields: [
+      {
+        key: "diceRules",
+        label: "Regras de rolagem",
+        placeholder:
+          "Exemplo: role 1d20 e some o modificador do atributo.",
+        hint: "Descreva a estrutura principal das rolagens.",
+      },
+      {
+        key: "tests",
+        label: "Testes e dificuldades",
+        placeholder:
+          "Teste fácil: dificuldade 8\nTeste médio: dificuldade 13\nTeste difícil: dificuldade 18\nSucesso crítico: resultado especial",
+        hint: "Defina dificuldades, sucessos, falhas e resultados especiais.",
+      },
+    ],
+  },
+  {
+    title: "Recursos e reservas",
+    subtitle: "ETAPA 05 · RECURSOS",
+    description:
+      "Crie os recursos utilizados pelos personagens durante suas aventuras.",
+    fields: [
+      {
+        key: "resources",
+        label: "Recursos",
+        placeholder:
+          "Vida: representa a capacidade de continuar lutando\nMana: utilizada para conjurar habilidades mágicas\nEnergia: utilizada em técnicas especiais\nSanidade: representa a estabilidade mental",
+        hint: "Descreva como cada recurso funciona e como é recuperado.",
+      },
+    ],
+  },
+  {
+    title: "Raças, origens e classes",
+    subtitle: "ETAPA 06 · IDENTIDADES",
+    description:
+      "Configure as opções de criação e personalização dos personagens.",
+    fields: [
+      {
+        key: "races",
+        label: "Raças e espécies",
+        placeholder:
+          "Humanos: versáteis e adaptáveis\nElfos: ligados à natureza e à magia\nAnões: resistentes e habilidosos",
+        hint: "Descreva características, vantagens e limitações.",
+      },
+      {
+        key: "classes",
+        label: "Classes e arquétipos",
+        placeholder:
+          "Guerreiro: especialista em combate físico\nMago: manipula forças arcanas\nLadino: utiliza agilidade e estratégia",
+        hint: "Descreva o papel e as características de cada classe.",
+      },
+    ],
+  },
+  {
+    title: "Habilidades e progressão",
+    subtitle: "ETAPA 07 · DESENVOLVIMENTO",
+    description:
+      "Defina poderes, técnicas, talentos e a evolução dos personagens.",
+    fields: [
+      {
+        key: "abilities",
+        label: "Habilidades e poderes",
+        placeholder:
+          "Nome da habilidade\nDescrição e efeito\nCusto de utilização\nRequisitos e limitações",
+        hint: "Descreva como as habilidades funcionam e quais são suas regras.",
+      },
+      {
+        key: "progression",
+        label: "Evolução e progressão",
+        placeholder:
+          "Como os personagens sobem de nível?\nComo recebem novos atributos?\nComo desbloqueiam habilidades?\nExiste experiência ou outro sistema de progressão?",
+        hint: "Explique como um personagem se desenvolve ao longo da campanha.",
+      },
+    ],
+  },
+  {
+    title: "Combate e condições",
+    subtitle: "ETAPA 08 · CONFRONTO",
+    description:
+      "Configure as regras de combate e os efeitos que podem afetar personagens.",
+    fields: [
+      {
+        key: "combat",
+        label: "Sistema de combate",
+        placeholder:
+          "Iniciativa\nOrdem dos turnos\nAções disponíveis\nMovimentação\nDefesa e esquiva\nDano e resistência",
+        hint: "Descreva como um confronto acontece do início ao fim.",
+      },
+      {
+        key: "conditions",
+        label: "Condições e efeitos",
+        placeholder:
+          "Envenenado: efeito e duração\nAtordoado: efeito e duração\nQueimando: efeito e duração\nAmedrontado: efeito e duração",
+        hint: "Registre condições, duração, consequências e formas de remoção.",
+      },
+    ],
+  },
+  {
+    title: "Equipamentos e itens",
+    subtitle: "ETAPA 09 · INVENTÁRIO",
+    description:
+      "Crie as regras para armas, armaduras, objetos e outros equipamentos.",
+    fields: [
+      {
+        key: "equipment",
+        label: "Equipamentos e itens",
+        placeholder:
+          "Armas e categorias\nArmaduras e proteção\nItens consumíveis\nPoções e materiais\nRaridade e propriedades especiais\nPeso e capacidade de carga",
+        hint: "Descreva os itens e as regras que controlam sua utilização.",
+      },
+    ],
+  },
+  {
+    title: "Revisão do sistema",
+    subtitle: "ETAPA 10 · FINALIZAÇÃO",
+    description:
+      "Revise as decisões do projeto e registre observações importantes.",
+    fields: [
+      {
+        key: "review",
+        label: "Observações e regras adicionais",
+        placeholder:
+          "Regras opcionais\nExceções às regras principais\nRecomendações para mestres\nPrincípios de equilíbrio\nOutras mecânicas que deseja implementar",
+        hint: "Este espaço é livre. Registre qualquer detalhe importante.",
+      },
+    ],
+  },
+];
+
 const sectionDescriptions: Record<Section, string> = {
   inicio: "Seu espaço de criação e aventuras.",
   sistemas: "Crie e organize seus próprios sistemas de RPG.",
@@ -69,7 +284,6 @@ function loadSystems(): RPGSystem[] {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) return [];
-
     const parsed: unknown = JSON.parse(saved);
     return Array.isArray(parsed) ? (parsed as RPGSystem[]) : [];
   } catch {
@@ -81,7 +295,6 @@ function createId(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
   }
-
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
@@ -90,6 +303,7 @@ export default function App() {
   const [systems, setSystems] = useState<RPGSystem[]>(loadSystems);
   const [creating, setCreating] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [step, setStep] = useState(0);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -97,6 +311,7 @@ export default function App() {
   const [dice, setDice] = useState("D20");
   const [visibility, setVisibility] =
     useState<"Privado" | "Público">("Privado");
+  const [builder, setBuilder] = useState<BuilderData>(emptyBuilder);
 
   useEffect(() => {
     try {
@@ -118,13 +333,31 @@ export default function App() {
     setGenre(genres[0]);
     setDice("D20");
     setVisibility("Privado");
+    setBuilder({ ...emptyBuilder });
+    setStep(0);
+  }
+
+  function startCreation() {
+    resetForm();
+    setCreating(true);
+    setSection("sistemas");
+  }
+
+  function updateBuilder(key: keyof BuilderData, value: string) {
+    setBuilder((current) => ({
+      ...current,
+      [key]: value,
+    }));
   }
 
   function saveSystem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const cleanName = name.trim();
-    if (!cleanName) return;
+    if (!cleanName) {
+      setStep(0);
+      return;
+    }
 
     const system: RPGSystem = {
       id: createId(),
@@ -134,6 +367,7 @@ export default function App() {
       dice,
       visibility,
       createdAt: new Date().toISOString(),
+      builder: { ...builder },
     };
 
     setSystems((current) => [system, ...current]);
@@ -143,12 +377,26 @@ export default function App() {
 
   function removeSystem(id: string) {
     if (!window.confirm("Deseja realmente excluir este sistema?")) return;
-
     setSystems((current) => current.filter((system) => system.id !== id));
+  }
+
+  function nextStep() {
+    if (step === 0 && !name.trim()) return;
+    setStep((current) => Math.min(current + 1, builderSteps.length));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function previousStep() {
+    setStep((current) => Math.max(current - 1, 0));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   const pageTitle =
     navigation.find((item) => item.id === section)?.label ?? "Início";
+
+  const isIdentityStep = step === 0;
+  const isFinalStep = step === builderSteps.length;
+  const currentStep = builderSteps[step - 1];
 
   return (
     <div className="app-shell">
@@ -198,7 +446,7 @@ export default function App() {
           <div className="sidebar-divider" />
           <span className="footer-star">✧</span>
           <p>Seu próximo mundo começa aqui.</p>
-          <small>FLARE RPG · VERSÃO 0.2</small>
+          <small>FLARE RPG · VERSÃO 0.3</small>
         </div>
       </aside>
 
@@ -216,7 +464,7 @@ export default function App() {
             <div className="breadcrumb">
               <span>FLARE</span>
               <span>/</span>
-              <strong>{creating ? "Novo sistema" : pageTitle}</strong>
+              <strong>{creating ? "Criador de sistemas" : pageTitle}</strong>
             </div>
           </div>
 
@@ -264,13 +512,7 @@ export default function App() {
                 </div>
 
                 <div className="quick-grid">
-                  <button
-                    className="quick-card"
-                    onClick={() => {
-                      navigate("sistemas");
-                      setCreating(true);
-                    }}
-                  >
+                  <button className="quick-card" onClick={startCreation}>
                     <span className="quick-icon">✧</span>
                     <strong>Criar um sistema</strong>
                     <p>Desenvolva suas próprias regras e mecânicas.</p>
@@ -359,7 +601,7 @@ export default function App() {
                     </div>
                     <button
                       className="primary-button"
-                      onClick={() => setCreating(true)}
+                      onClick={startCreation}
                     >
                       + Criar sistema
                     </button>
@@ -380,7 +622,7 @@ export default function App() {
                       </p>
                       <button
                         className="secondary-button"
-                        onClick={() => setCreating(true)}
+                        onClick={startCreation}
                       >
                         Criar meu primeiro sistema
                       </button>
@@ -390,7 +632,8 @@ export default function App() {
                       {systems.map((system) => (
                         <article className="system-card" key={system.id}>
                           <div className="system-card-icon">✧</div>
-                          <div className="system-card-content">
+                          <div clas
+sName="system-card-content">
                             <div className="system-card-title">
                               <h2>{system.name}</h2>
                               <span
@@ -416,6 +659,11 @@ export default function App() {
                                 )}
                               </span>
                             </div>
+                            {system.builder && (
+                              <small className="system-configured">
+                                ✧ Configurações do sistema salvas
+                              </small>
+                            )}
                           </div>
                           <button
                             className="delete-button"
@@ -442,151 +690,301 @@ export default function App() {
                   </button>
 
                   <div className="creation-heading">
-                    <span className="eyebrow">CRIADOR DE SISTEMAS · ETAPA 1</span>
-                    <h1>Vamos criar um universo.</h1>
+                    <span className="eyebrow">
+                      CRIADOR DE SISTEMAS · ETAPA {String(step + 1).padStart(2, "0")}
+                    </span>
+                    <h1>Construa seu próprio RPG.</h1>
                     <p>
-                      Primeiro, defina a identidade do seu sistema. As regras
-                      e mecânicas serão configuradas em etapas futuras.
+                      Configure cada parte do seu sistema. Você pode avançar,
+                      voltar e revisar suas escolhas antes de salvar.
                     </p>
                   </div>
 
-                  <div className="creation-progress">
-                    <ProgressStep number="1" label="Identidade" active />
-                    <div className="progress-line" />
-                    <ProgressStep number="2" label="Atributos" />
-                    <div className="progress-line" />
-                    <ProgressStep number="3" label="Mecânicas" />
-                    <div className="progress-line" />
-                    <ProgressStep number="4" label="Finalização" />
+                  <div className="builder-progress-info">
+                    <span>
+                      {isFinalStep
+                        ? "Revisão final"
+                        : `Etapa ${step + 1} de ${builderSteps.length + 1}`}
+                    </span>
+                    <strong>
+                      {Math.round(
+                        ((step + 1) / (builderSteps.length + 1)) * 100
+                      )}
+                      %
+                    </strong>
                   </div>
 
-                  <form className="system-form" onSubmit={saveSystem}>
-                    <FormHeading number="01" title="Identidade do sistema" />
-
-                    <label className="form-field">
-                      <span>Nome do sistema *</span>
-                      <input
-                        className="form-input"
-                        value={name}
-                        onChange={(event) => setName(event.target.value)}
-                        placeholder="Ex.: Crônicas do Véu Partido"
-                        maxLength={60}
-                        required
-                      />
-                      <small>Escolha um nome para seu RPG.</small>
-                    </label>
-
-                    <label className="form-field">
-                      <span>Descrição</span>
-                      <textarea
-                        className="form-input form-textarea"
-                        value={description}
-                        onChange={(event) =>
-                          setDescription(event.target.value)
-                        }
-                        placeholder="Conte um pouco sobre o universo e a proposta do seu RPG..."
-                        maxLength={500}
-                        rows={4}
-                      />
-                      <small>{description.length}/500 caracteres</small>
-                    </label>
-
-                    <div className="form-divider" />
-
-                    <FormHeading
-                      number="02"
-                      title="Características fundamentais"
+                  <div className="builder-progress-track">
+                    <div
+                      className="builder-progress-fill"
+                      style={{
+                        width: `${((step + 1) / (builderSteps.length + 1)) * 100}%`,
+                      }}
                     />
+                  </div>
 
-                    <div className="form-two-columns">
-                      <label className="form-field">
-                        <span>Gênero / Ambientação</span>
-                        <select
-                          className="form-input"
-                          value={genre}
-                          onChange={(event) => setGenre(event.target.value)}
-                        >
-                          {genres.map((item) => (
-                            <option key={item}>{item}</option>
-                          ))}
-                        </select>
-                      </label>
-
-                      <label className="form-field">
-                        <span>Dado principal</span>
-                        <select
-                          className="form-input"
-                          value={dice}
-                          onChange={(event) => setDice(event.target.value)}
-                        >
-                          {diceOptions.map((item) => (
-                            <option key={item}>{item}</option>
-                          ))}
-                        </select>
-                      </label>
-                    </div>
-
-                    <div className="form-divider" />
-
-                    <FormHeading number="03" title="Visibilidade" />
-
-                    <div className="visibility-options">
+                  <div className="builder-step-nav">
+                    <button
+                      type="button"
+                      className={step === 0 ? "current" : "completed"}
+                      onClick={() => setStep(0)}
+                    >
+                      <span>01</span>
+                      <small>Identidade</small>
+                    </button>
+                    {builderSteps.map((item, index) => (
                       <button
                         type="button"
-                        className={`visibility-option ${
-                          visibility === "Privado" ? "selected" : ""
-                        }`}
-                        onClick={() => setVisibility("Privado")}
+                        key={item.title}
+                        className={
+                          step === index + 1
+                            ? "current"
+                            : step > index + 1
+                              ? "completed"
+                              : ""
+                        }
+                        onClick={() => {
+                          if (index + 1 <= step || (step === 0 && name.trim())) {
+                            setStep(index + 1);
+                          }
+                        }}
                       >
-                        <span className="visibility-icon">♙</span>
-                        <strong>Privado</strong>
-                        <small>
-                          Somente você poderá acessar neste navegador.
-                        </small>
+                        <span>{String(index + 2).padStart(2, "0")}</span>
+                        <small>{item.title}</small>
                       </button>
+                    ))}
+                  </div>
 
-                      <button
-                        type="button"
-                        className={`visibility-option ${
-                          visibility === "Público" ? "selected" : ""
-                        }`}
-                        onClick={() => setVisibility("Público")}
-                      >
-                        <span className="visibility-icon">◎</span>
-                        <strong>Público</strong>
-                        <small>
-                          Preparado para compartilhamento futuro.
-                        </small>
-                      </button>
-                    </div>
+                  <form className="system-form builder-form" onSubmit={saveSystem}>
+                    {isIdentityStep ? (
+                      <>
+                        <div className="form-heading">
+                          <span>01</span>
+                          <div>
+                            <h2>Identidade do sistema</h2>
+                            <p>Comece dando uma identidade ao seu projeto.</p>
+                          </div>
+                        </div>
 
-                    <div className="form-notice">
-                      <span>ⓘ</span>
-                      <p>
-                        Os sistemas são salvos apenas neste navegador.
-                        Publicação pública e sincronização ainda não estão
-                        disponíveis.
-                      </p>
-                    </div>
+                        <label className="form-field">
+                          <span>Nome do sistema *</span>
+                          <input
+                            className="form-input"
+                            value={name}
+                            onChange={(event) => setName(event.target.value)}
+                            placeholder="Ex.: Crônicas do Véu Partido"
+                            maxLength={60}
+                            required
+                          />
+                          <small>Escolha um nome para seu RPG.</small>
+                        </label>
 
-                    <div className="form-actions">
+                        <label className="form-field">
+                          <span>Descrição</span>
+                          <textarea
+                            className="form-input form-textarea"
+                            value={description}
+                            onChange={(event) =>
+                              setDescription(event.target.value)
+                            }
+                            placeholder="Conte um pouco sobre o universo e a proposta do seu RPG..."
+                            maxLength={500}
+                            rows={4}
+                          />
+                          <small>{description.length}/500 caracteres</small>
+                        </label>
+
+                        <div className="form-divider" />
+
+                        <div className="form-two-columns">
+                          <label className="form-field">
+                            <span>Gênero / Ambientação</span>
+                            <select
+                              className="form-input"
+                              value={genre}
+                              onChange={(event) => setGenre(event.target.value)}
+                            >
+                              {genres.map((item) => (
+                                <option key={item}>{item}</option>
+                              ))}
+                            </select>
+                          </label>
+
+                          <label className="form-field">
+                            <span>Dado principal</span>
+                            <select
+                              className="form-input"
+                              value={dice}
+                              onChange={(event) => setDice(event.target.value)}
+                            >
+                              {diceOptions.map((item) => (
+                                <option key={item}>{item}</option>
+                              ))}
+                            </select>
+                          </label>
+                        </div>
+
+                        <div className="form-divider" />
+
+                        <div className="form-heading">
+                          <span>02</span>
+                          <div>
+                            <h2>Visibilidade</h2>
+                            <p>Escolha como deseja classificar seu projeto.</p>
+                          </div>
+                        </div>
+
+                        <div className="visibility-options">
+                          <button
+                            type="button"
+                            className={`visibility-option ${
+                              visibility === "Privado" ? "selected" : ""
+                            }`}
+                            onClick={() => setVisibility("Privado")}
+                          >
+                            <span className="visibility-icon">♙</span>
+                            <strong>Privado</strong>
+                            <small>
+                              Somente você poderá acessar neste navegador.
+                            </small>
+                          </button>
+
+                          <button
+                            type="button"
+                            className={`visibility-option ${
+                              visibility === "Público" ? "selected" : ""
+                            }`}
+                            onClick={() => setVisibility("Público")}
+                          >
+                            <span className="visibility-icon">◎</span>
+                            <strong>Público</strong>
+                            <small>
+                              Preparado para compartilhamento futuro.
+                            </small>
+                          </button>
+                        </div>
+                      </>
+                    ) : !isFinalStep && currentStep ? (
+                      <>
+                        <div className="form-heading">
+                          <span>{String(step + 1).padStart(2, "0")}</span>
+                          <div>
+                            <h2>{currentStep.title}</h2>
+                            <p>{currentStep.description}</p>
+                          </div>
+                        </div>
+
+                        <span className="eyebrow">{currentStep.subtitle}</span>
+
+                        <div className="builder-fields">
+                          {currentStep.fields.map((field) => (
+                            <label className="form-field" key={field.key}>
+                              <span>{field.label}</span>
+                              <textarea
+                                className="form-input form-textarea builder-textarea"
+                                value={builder[field.key]}
+                                onChange={(event) =>
+                                  updateBuilder(field.key, event.target.value)
+                                }
+                                placeholder={field.placeholder}
+                                rows={8}
+                              />
+                              <small>{field.hint}</small>
+                            </label>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="form-heading">
+                          <span>10</span>
+                          <div>
+                            <h2>Revise seu sistema</h2>
+                            <p>
+                              Confira as informações antes de salvar o projeto.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="builder-review">
+                          <div>
+                            <span>IDENTIDADE</span>
+                            <h3>{name || "Sistema sem nome"}</h3>
+                            <p>{description || "Sem descrição."}</p>
+                            <small>
+                              {genre} · Dado principal: {dice} · {visibility}
+                            </small>
+                          </div>
+
+                          {builderSteps.map((item, index) => {
+                            const content = item.fields
+                              .map((field) => builder[field.key].trim())
+                              .filter(Boolean);
+
+                            return (
+                              <div className="review-section" key={item.title}>
+                                <div>
+                                  <strong>
+                                    {String(index + 2).padStart(2, "0")} ·{" "}
+                                    {item.title}
+                                  </strong>
+                                  <button
+                                    type="button"
+                                    onClick={() => setStep(index + 1)}
+                                  >
+                                    Editar
+                                  </button>
+                                </div>
+                                <p>
+                                  {content.length > 0
+                                    ? `${content.length} campo(s) preenchido(s)`
+                                    : "Ainda não configurado"}
+                                </p>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="form-notice">
+                          <span>ⓘ</span>
+                          <p>
+                            O projeto será salvo neste navegador. As regras
+                            estão registradas como configurações, mas ainda
+                            não executam cálculos automáticos nem são
+                            compartilhadas online.
+                          </p>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="builder-navigation">
                       <button
                         type="button"
                         className="secondary-button"
-                        onClick={() => {
-                          resetForm();
-                          setCreating(false);
-                        }}
+                        onClick={previousStep}
+                        disabled={step === 0}
                       >
-                        Cancelar
+                        ← Etapa anterior
                       </button>
-                      <button
-                        type="submit"
-                        className="primary-button"
-                        disabled={!name.trim()}
-                      >
-                        Salvar sistema →
-                      </button>
+
+                      {isFinalStep ? (
+                        <button
+                          type="submit"
+                          className="primary-button"
+                          disabled={!name.trim()}
+                        >
+                          Salvar sistema ✧
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="primary-button"
+                          onClick={nextStep}
+                          disabled={isIdentityStep && !name.trim()}
+                        >
+                          Próxima etapa →
+                        </button>
+                      )}
                     </div>
                   </form>
                 </div>
@@ -645,36 +1043,5 @@ function OverviewCard({
       <span className="overview-link">Acessar →</span>
     </button>
   );
-}
-
-function ProgressStep({
-  number,
-  label,
-  active = false,
-}: {
-  number: string;
-  label: string;
-  active?: boolean;
-}) {
-  return (
-    <div className={`progress-step ${active ? "active" : ""}`}>
-      <span>{number}</span>
-      <small>{label}</small>
-    </div>
-  );
-}
-
-function FormHeading({
-  number,
-  title,
-}: {
-  number: string;
-  title: string;
-}) {
-  return (
-    <div className="form-heading">
-      <span>{number}</span>
-      <h2>{title}</h2>
-    </div>
-  );
-}
+                          }
+                              

@@ -567,4 +567,114 @@ export default function App() {
                         Publicação pública e sincronização ainda não estão
                         disponíveis.
                       </p>
-                    </di
+                    </div>
+
+                    <div className="form-actions">
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() => {
+                          resetForm();
+                          setCreating(false);
+                        }}
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="primary-button"
+                        disabled={!name.trim()}
+                      >
+                        Salvar sistema →
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+            </section>
+          )}
+
+          {section !== "inicio" && section !== "sistemas" && (
+            <section className="placeholder-page">
+              <span className="eyebrow">FLARE RPG</span>
+              <h1>{pageTitle}</h1>
+              <p>{sectionDescriptions[section]}</p>
+              <div className="construction-panel">
+                <span>✧</span>
+                <h2>Este espaço está sendo preparado.</h2>
+                <p>
+                  Esta parte da plataforma ainda está em desenvolvimento.
+                </p>
+                <small>EM DESENVOLVIMENTO</small>
+              </div>
+              <button
+                className="secondary-button"
+                onClick={() => navigate("inicio")}
+              >
+                ← Voltar ao início
+              </button>
+            </section>
+          )}
+
+          <footer className="main-footer">
+            <strong>FLARE RPG</strong>
+            <span>Crie mundos. Conte histórias. Jogue juntos.</span>
+          </footer>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function OverviewCard({
+  icon,
+  title,
+  status,
+  onClick,
+}: {
+  icon: string;
+  title: string;
+  status: string;
+  onClick: () => void;
+}) {
+  return (
+    <button className="overview-card" onClick={onClick}>
+      <span className="overview-icon">{icon}</span>
+      <strong>{title}</strong>
+      <small>{status}</small>
+      <span className="overview-link">Acessar →</span>
+    </button>
+  );
+}
+
+function ProgressStep({
+  number,
+  label,
+  active = false,
+}: {
+  number: string;
+  label: string;
+  active?: boolean;
+}) {
+  return (
+    <div className={`progress-step ${active ? "active" : ""}`}>
+      <span>{number}</span>
+      <small>{label}</small>
+    </div>
+  );
+}
+
+function FormHeading({
+  number,
+  title,
+}: {
+  number: string;
+  title: string;
+}) {
+  return (
+    <div className="form-heading">
+      <span>{number}</span>
+      <h2>{title}</h2>
+    </div>
+  );
+}

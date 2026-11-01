@@ -55,6 +55,16 @@ const diceOptions = [
   "Personalizado",
 ];
 
+const sectionDescriptions: Record<Section, string> = {
+  inicio: "Seu espaço de criação e aventuras.",
+  sistemas: "Crie e organize seus próprios sistemas de RPG.",
+  personagens: "Seus heróis, suas histórias e suas fichas.",
+  campanhas: "Organize aventuras e conduza suas sessões.",
+  grupos: "Reúna seus jogadores e organize suas mesas.",
+  biblioteca: "Guarde e organize seus conteúdos de RPG.",
+  configuracoes: "Personalize sua experiência no Flare RPG.",
+};
+
 function loadSystems(): RPGSystem[] {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -67,122 +77,113 @@ function loadSystems(): RPGSystem[] {
   }
 }
 
-function makeId(): string {
-  if (
-    typeof crypto !== "undefined" &&
-    typeof crypto.randomUUID === "function"
-  ) {
+function createId(): string {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
   }
 
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function App() {
-  const [activeSection, setActiveSection] = useState<Section>("inicio");
+export default function App() {
+  const [section, setSection] = useState<Section>("inicio");
   const [systems, setSystems] = useState<RPGSystem[]>(loadSystems);
-  const [isCreating, setIsCreating] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const [systemName, setSystemName] = useState("");
-  const [systemDescription, setSystemDescription] = useState("");
-  const [systemGenre, setSystemGenre] = useState(genres[0]);
-  const [systemDice, setSystemDice] = useState("D20");
-  const [systemVisibility, setSystemVisibility] =
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [genre, setGenre] = useState(genres[0]);
+  const [dice, setDice] = useState("D20");
+  const [visibility, setVisibility] =
     useState<"Privado" | "Público">("Privado");
 
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(systems));
     } catch {
-      // O navegador pode bloquear o armazenamento local.
+      // O armazenamento local pode estar indisponível.
     }
   }, [systems]);
 
-  function openSection(section: Section) {
-    setActiveSection(section);
-    setIsCreating(false);
-    setSidebarOpen(false);
+  function navigate(next: Section) {
+    setSection(next);
+    setCreating(false);
+    setMenuOpen(false);
   }
 
   function resetForm() {
-    setSystemName("");
-    setSystemDescription("");
-    setSystemGenre(genres[0]);
-    setSystemDice("D20");
-    setSystemVisibility("Privado");
+    setName("");
+    setDescription("");
+    setGenre(genres[0]);
+    setDice("D20");
+    setVisibility("Privado");
   }
 
-  function createSystem(event: FormEvent<HTMLFormElement>) {
+  function saveSystem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const trimmedName = systemName.trim();
-    if (!trimmedName) return;
+    const cleanName = name.trim();
+    if (!cleanName) return;
 
-    const newSystem: RPGSystem = {
-      id: makeId(),
-      name: trimmedName,
-      description: systemDescription.trim(),
-      genre: systemGenre,
-      dice: systemDice,
-      visibility: systemVisibility,
+    const system: RPGSystem = {
+      id: createId(),
+      name: cleanName,
+      description: description.trim(),
+      genre,
+      dice,
+      visibility,
       createdAt: new Date().toISOString(),
     };
 
-    setSystems((current) => [newSystem, ...current]);
+    setSystems((current) => [system, ...current]);
     resetForm();
-    setIsCreating(false);
+    setCreating(false);
   }
 
-  function deleteSystem(id: string) {
-    const confirmed = window.confirm(
-      "Tem certeza de que deseja excluir este sistema? Essa ação não pode ser desfeita."
-    );
+  function removeSystem(id: string) {
+    if (!window.confirm("Deseja realmente excluir este sistema?")) return;
 
-    if (confirmed) {
-      setSystems((current) => current.filter((system) => system.id !== id));
-    }
+    setSystems((current) => current.filter((system) => system.id !== id));
   }
 
   const pageTitle =
-    navigation.find((item) => item.id === activeSection)?.label ?? "Início";
+    navigation.find((item) => item.id === section)?.label ?? "Início";
 
   return (
     <div className="app-shell">
-      {sidebarOpen && (
+      {menuOpen && (
         <button
           className="sidebar-backdrop"
           aria-label="Fechar menu"
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => setMenuOpen(false)}
         />
       )}
 
-      <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
+      <aside className={`sidebar ${menuOpen ? "sidebar-open" : ""}`}>
         <div className="brand">
-          <div className="brand-symbol">F</div>
-          <div className="brand-name">
-            <span>FLARE</span>
-            <small>RPG PLATFORM</small>
+          <div className="brand-emblem">✦</div>
+          <div>
+            <div className="brand-name">FLARE</div>
+            <div className="brand-subtitle">RPG PLATFORM</div>
           </div>
           <button
             className="sidebar-close"
+            onClick={() => setMenuOpen(false)}
             aria-label="Fechar menu"
-            onClick={() => setSidebarOpen(false)}
           >
             ×
           </button>
         </div>
 
-        <div className="sidebar-label">ESPAÇO DE CRIAÇÃO</div>
+        <div className="sidebar-label">MENU PRINCIPAL</div>
 
         <nav className="navigation">
           {navigation.map((item) => (
             <button
               key={item.id}
-              className={`nav-item ${
-                activeSection === item.id ? "nav-item-active" : ""
-              }`}
-              onClick={() => openSection(item.id)}
+              className={`nav-item ${section === item.id ? "active" : ""}`}
+              onClick={() => navigate(item.id)}
             >
               <span className="nav-icon">{item.icon}</span>
               <span>{item.label}</span>
@@ -193,16 +194,11 @@ function App() {
           ))}
         </nav>
 
-        <div className="sidebar-bottom">
+        <div className="sidebar-footer">
           <div className="sidebar-divider" />
-          <div className="sidebar-quote">
-            <span className="quote-mark">“</span>
-            <p>
-              Toda grande aventura começa com uma ideia.
-            </p>
-            <small>O SEU MUNDO, SUAS REGRAS.</small>
-          </div>
-          <div className="sidebar-version">FLARE RPG · VERSÃO INICIAL</div>
+          <span className="footer-star">✧</span>
+          <p>Seu próximo mundo começa aqui.</p>
+          <small>FLARE RPG · VERSÃO 0.2</small>
         </div>
       </aside>
 
@@ -211,215 +207,210 @@ function App() {
           <div className="topbar-left">
             <button
               className="menu-toggle"
+              onClick={() => setMenuOpen(true)}
               aria-label="Abrir menu"
-              onClick={() => setSidebarOpen(true)}
             >
               ☰
             </button>
+
             <div className="breadcrumb">
-              <span>FLARE RPG</span>
-              <span className="breadcrumb-separator">/</span>
-              <strong>{pageTitle}</strong>
+              <span>FLARE</span>
+              <span>/</span>
+              <strong>{creating ? "Novo sistema" : pageTitle}</strong>
             </div>
           </div>
 
-          <div className="topbar-right">
-            <div className="status-indicator">
-              <span />
-              Ambiente local
+          <div className="account">
+            <div className="account-avatar">?</div>
+            <div>
+              <strong>Visitante</strong>
+              <small>Conta não conectada</small>
             </div>
-            <div className="profile-avatar">A</div>
           </div>
         </header>
 
         <div className="page-content">
-          {activeSection === "inicio" && (
-            <section className="dashboard">
-              <div className="welcome-heading">
-                <div>
-                  <div className="eyebrow">
-                    <span className="eyebrow-line" />
-                    SEU ESPAÇO DE AVENTURAS
-                  </div>
+          {section === "inicio" && (
+            <>
+              <section className="welcome-section">
+                <div className="welcome-content">
+                  <span className="eyebrow">SUA JORNADA COMEÇA AQUI</span>
                   <h1>
-                    Bem-vindo ao <span>Flare.</span>
+                    Bem-vindo ao <span>Flare RPG.</span>
                   </h1>
-                  <p className="welcome-description">
-                    Crie mundos, desenvolva sistemas e prepare suas próximas
-                    aventuras.
-                  </p>
-                </div>
-                <div className="welcome-emblem">
-                  <div className="emblem-ring emblem-ring-outer" />
-                  <div className="emblem-ring emblem-ring-inner" />
-                  <span>✦</span>
-                </div>
-              </div>
-
-              <div className="hero-card">
-                <div className="hero-content">
-                  <span className="hero-kicker">O COMEÇO DE ALGO GRANDE</span>
-                  <h2>Seu próximo mundo começa aqui.</h2>
                   <p>
-                    Construa um sistema próprio, estabeleça suas regras e
-                    transforme suas ideias em experiências de RPG.
+                    Um espaço para criar mundos, desenvolver histórias e
+                    reunir pessoas em torno de grandes aventuras.
                   </p>
                   <button
                     className="primary-button"
+                    onClick={() => navigate("sistemas")}
+                  >
+                    ✧ Explorar meus sistemas <span>→</span>
+                  </button>
+                </div>
+
+                <div className="welcome-decoration">
+                  <div className="decoration-ring ring-one" />
+                  <div className="decoration-ring ring-two" />
+                  <div className="decoration-core">✦</div>
+                </div>
+              </section>
+
+              <section className="content-section">
+                <div className="section-heading">
+                  <span className="eyebrow">ACESSO RÁPIDO</span>
+                  <h2>O que vamos criar hoje?</h2>
+                </div>
+
+                <div className="quick-grid">
+                  <button
+                    className="quick-card"
                     onClick={() => {
-                      openSection("sistemas");
-                      setIsCreating(true);
+                      navigate("sistemas");
+                      setCreating(true);
                     }}
                   >
-                    <span>＋</span> Criar um sistema
+                    <span className="quick-icon">✧</span>
+                    <strong>Criar um sistema</strong>
+                    <p>Desenvolva suas próprias regras e mecânicas.</p>
+                    <span className="card-arrow">→</span>
+                  </button>
+
+                  <button
+                    className="quick-card"
+                    onClick={() => navigate("personagens")}
+                  >
+                    <span className="quick-icon">♙</span>
+                    <strong>Criar personagem</strong>
+                    <p>Dê vida a um novo aventureiro.</p>
+                    <span className="card-arrow">→</span>
+                  </button>
+
+                  <button
+                    className="quick-card"
+                    onClick={() => navigate("campanhas")}
+                  >
+                    <span className="quick-icon">⚔</span>
+                    <strong>Nova campanha</strong>
+                    <p>Prepare uma jornada para seu grupo.</p>
+                    <span className="card-arrow">→</span>
                   </button>
                 </div>
-                <div className="hero-decoration">
-                  <div className="hero-orbit orbit-one" />
-                  <div className="hero-orbit orbit-two" />
-                  <div className="hero-orbit orbit-three" />
-                  <div className="hero-core">✧</div>
+              </section>
+
+              <section className="content-section">
+                <div className="section-heading">
+                  <span className="eyebrow">SEU ESPAÇO</span>
+                  <h2>Visão geral</h2>
                 </div>
-              </div>
 
-              <div className="section-heading">
-                <div>
-                  <span className="eyebrow">VISÃO GERAL</span>
-                  <h2>Seu espaço de trabalho</h2>
+                <div className="overview-grid">
+                  <OverviewCard
+                    icon="⚔"
+                    title="Campanhas"
+                    status="Nenhuma campanha criada"
+                    onClick={() => navigate("campanhas")}
+                  />
+                  <OverviewCard
+                    icon="✧"
+                    title="Sistemas"
+                    status={`${systems.length} sistema(s) criado(s)`}
+                    onClick={() => navigate("sistemas")}
+                  />
+                  <OverviewCard
+                    icon="♙"
+                    title="Personagens"
+                    status="Nenhum personagem criado"
+                    onClick={() => navigate("personagens")}
+                  />
                 </div>
-              </div>
+              </section>
 
-              <div className="overview-grid">
-                <OverviewCard
-                  icon="✧"
-                  label="Sistemas criados"
-                  value={systems.length.toString()}
-                  description="Seus sistemas personalizados"
-                />
-                <OverviewCard
-                  icon="♙"
-                  label="Personagens"
-                  value="0"
-                  description="Ficha e evolução de personagens"
-                />
-                <OverviewCard
-                  icon="⚔"
-                  label="Campanhas"
-                  value="0"
-                  description="Suas aventuras em andamento"
-                />
-                <OverviewCard
-                  icon="♧"
-                  label="Grupos"
-                  value="0"
-                  description="Mesas e comunidades"
-                />
-              </div>
-
-              <div className="section-heading recent-heading">
-                <div>
-                  <span className="eyebrow">CONTINUE DE ONDE PAROU</span>
+              <section className="content-section">
+                <div className="section-heading">
+                  <span className="eyebrow">ACOMPANHAMENTO</span>
                   <h2>Atividade recente</h2>
                 </div>
-              </div>
 
-              <div className="activity-empty">
-                <div className="empty-icon">⌁</div>
-                <h3>Seu registro de aventuras está vazio.</h3>
-                <p>
-                  Quando você começar a criar seus sistemas e campanhas, suas
-                  atividades aparecerão aqui.
-                </p>
-              </div>
-            </section>
-          )}
-
-          {activeSection === "sistemas" && (
-            <section className="systems-page">
-              <div className="systems-heading">
-                <div>
-                  <div className="eyebrow">
-                    <span className="eyebrow-line" />
-                    FORJA DE REGRAS
-                  </div>
-                  <h1>Meus sistemas</h1>
+                <div className="empty-activity">
+                  <span>◈</span>
+                  <strong>Suas aventuras aparecerão aqui.</strong>
                   <p>
-                    Crie e organize sistemas de RPG com suas próprias regras.
+                    Suas atividades recentes serão organizadas neste espaço.
                   </p>
                 </div>
+              </section>
+            </>
+          )}
 
-                {!isCreating && (
-                  <button
-                    className="primary-button create-top-button"
-                    onClick={() => setIsCreating(true)}
-                  >
-                    <span>＋</span> Novo sistema
-                  </button>
-                )}
-              </div>
-
-              {!isCreating ? (
+          {section === "sistemas" && (
+            <section className="systems-page">
+              {!creating ? (
                 <>
-                  <div className="systems-toolbar">
-                    <div className="systems-total">
-                      <span className="systems-total-number">
-                        {systems.length.toString().padStart(2, "0")}
-                      </span>
-                      <span>
-                        {systems.length === 1
-                          ? "SISTEMA CRIADO"
-                          : "SISTEMAS CRIADOS"}
-                      </span>
+                  <div className="systems-heading">
+                    <div>
+                      <span className="eyebrow">SEU ACERVO</span>
+                      <h1>Meus sistemas</h1>
+                      <p>
+                        Construa sistemas de RPG com suas próprias regras,
+                        mecânicas e universos.
+                      </p>
                     </div>
-                    <span className="local-storage-label">
-                      <span /> SALVOS NESTE NAVEGADOR
-                    </span>
+                    <button
+                      className="primary-button"
+                      onClick={() => setCreating(true)}
+                    >
+                      + Criar sistema
+                    </button>
+                  </div>
+
+                  <div className="systems-toolbar">
+                    <span>{systems.length} sistema(s) criado(s)</span>
+                    <small>SEUS PROJETOS</small>
                   </div>
 
                   {systems.length === 0 ? (
                     <div className="systems-empty">
-                      <div className="systems-empty-symbol">✧</div>
-                      <h2>Uma página em branco.</h2>
+                      <span>✧</span>
+                      <h2>Seu próximo universo começa aqui.</h2>
                       <p>
-                        Você ainda não criou nenhum sistema. Dê o primeiro
-                        passo e comece a construir suas próprias regras.
+                        Você ainda não criou nenhum sistema. Comece definindo
+                        a identidade do seu RPG.
                       </p>
                       <button
-                        className="primary-button"
-                        onClick={() => setIsCreating(true)}
+                        className="secondary-button"
+                        onClick={() => setCreating(true)}
                       >
-                        <span>＋</span> Criar meu primeiro sistema
+                        Criar meu primeiro sistema
                       </button>
                     </div>
                   ) : (
                     <div className="systems-list">
                       {systems.map((system) => (
                         <article className="system-card" key={system.id}>
-                          <div className="system-card-symbol">✧</div>
+                          <div className="system-card-icon">✧</div>
                           <div className="system-card-content">
-                            <div className="system-card-topline">
-                              <span className="system-genre">
-                                {system.genre}
-                              </span>
+                            <div className="system-card-title">
+                              <h2>{system.name}</h2>
                               <span
                                 className={`visibility-tag ${
                                   system.visibility === "Público"
-                                    ? "visibility-public"
+                                    ? "public"
                                     : ""
                                 }`}
                               >
                                 {system.visibility}
                               </span>
                             </div>
-                            <h3>{system.name}</h3>
                             <p>
                               {system.description ||
-                                "Nenhuma descrição foi adicionada."}
+                                "Nenhuma descrição adicionada."}
                             </p>
-                            <div className="system-card-meta">
-                              <span>Dado principal: {system.dice}</span>
+                            <div className="system-metadata">
+                              <span>{system.genre}</span>
+                              <span>Dados: {system.dice}</span>
                               <span>
-                                Criado em{" "}
                                 {new Date(system.createdAt).toLocaleDateString(
                                   "pt-BR"
                                 )}
@@ -427,10 +418,9 @@ function App() {
                             </div>
                           </div>
                           <button
-                            className="delete-system-button"
-                            onClick={() => deleteSystem(system.id)}
+                            className="delete-button"
+                            onClick={() => removeSystem(system.id)}
                             aria-label={`Excluir ${system.name}`}
-                            title="Excluir sistema"
                           >
                             ×
                           </button>
@@ -441,133 +431,140 @@ function App() {
                 </>
               ) : (
                 <div className="system-creation">
-                  <div className="creation-header">
-                    <button
-                      className="back-button"
-                      onClick={() => {
-                        setIsCreating(false);
-                        resetForm();
-                      }}
-                    >
-                      ← Voltar para meus sistemas
-                    </button>
-                    <span className="creation-step-label">
-                      ETAPA 01 <span>/</span> 04
-                    </span>
-                  </div>
+                  <button
+                    className="back-button"
+                    onClick={() => {
+                      resetForm();
+                      setCreating(false);
+                    }}
+                  >
+                    ← Voltar aos meus sistemas
+                  </button>
 
-                  <div className="creation-progress">
-                    <div className="progress-step progress-step-active">
-                      <span>01</span>
-                      <small>Identidade</small>
-                    </div>
-                    <div className="progress-line" />
-                    <div className="progress-step">
-                      <span>02</span>
-                      <small>Atributos</small>
-                    </div>
-                    <div className="progress-line" />
-                    <div className="progress-step">
-                      <span>03</span>
-                      <small>Mecânicas</small>
-                    </div>
-                    <div className="progress-line" />
-                    <div className="progress-step">
-                      <span>04</span>
-                      <small>Finalização</small>
-                    </div>
-                  </div>
-
-                  <div className="creation-intro">
-                    <span className="eyebrow">PRIMEIROS FUNDAMENTOS</span>
-                    <h2>Dê identidade ao seu sistema.</h2>
+                  <div className="creation-heading">
+                    <span className="eyebrow">CRIADOR DE SISTEMAS · ETAPA 1</span>
+                    <h1>Vamos criar um universo.</h1>
                     <p>
-                      Toda criação precisa de uma base. Comece definindo o
-                      nome, o universo e algumas características fundamentais
-                      do seu RPG.
+                      Primeiro, defina a identidade do seu sistema. As regras
+                      e mecânicas serão configuradas em etapas futuras.
                     </p>
                   </div>
 
-                  <form className="system-form" onSubmit={createSystem}>
-                    <div className="form-section-title">
-                      <span>01</span>
-                      <div>
-                        <h3>Identidade do sistema</h3>
-                        <p>Como seu sistema será conhecido?</p>
-                      </div>
-                    </div>
+                  <div className="creation-progress">
+                    <ProgressStep number="1" label="Identidade" active />
+                    <div className="progress-line" />
+                    <ProgressStep number="2" label="Atributos" />
+                    <div className="progress-line" />
+                    <ProgressStep number="3" label="Mecânicas" />
+                    <div className="progress-line" />
+                    <ProgressStep number="4" label="Finalização" />
+                  </div>
+
+                  <form className="system-form" onSubmit={saveSystem}>
+                    <FormHeading number="01" title="Identidade do sistema" />
 
                     <label className="form-field">
-                      <span>Nome do sistema <b>*</b></span>
+                      <span>Nome do sistema *</span>
                       <input
                         className="form-input"
-                        type="text"
+                        value={name}
+                        onChange={(event) => setName(event.target.value)}
                         placeholder="Ex.: Crônicas do Véu Partido"
-                        value={systemName}
-                        onChange={(event) => setSystemName(event.target.value)}
                         maxLength={60}
                         required
                       />
-                      <small>Escolha um nome que represente seu universo.</small>
+                      <small>Escolha um nome para seu RPG.</small>
                     </label>
 
                     <label className="form-field">
                       <span>Descrição</span>
                       <textarea
                         className="form-input form-textarea"
-                        placeholder="Descreva a proposta, o universo ou a experiência do seu RPG..."
-                        value={systemDescription}
+                        value={description}
                         onChange={(event) =>
-                          setSystemDescription(event.target.value)
+                          setDescription(event.target.value)
                         }
+                        placeholder="Conte um pouco sobre o universo e a proposta do seu RPG..."
                         maxLength={500}
                         rows={4}
                       />
-                      <small>
-                        {systemDescription.length}/500 caracteres
-                      </small>
+                      <small>{description.length}/500 caracteres</small>
                     </label>
 
                     <div className="form-divider" />
 
-                    <div className="form-section-title">
-                      <span>02</span>
-                      <div>
-                        <h3>Características fundamentais</h3>
-                        <p>Defina os pilares iniciais das regras.</p>
-                      </div>
-                    </div>
+                    <FormHeading
+                      number="02"
+                      title="Características fundamentais"
+                    />
 
                     <div className="form-two-columns">
                       <label className="form-field">
-                        <span>Gênero do universo</span>
+                        <span>Gênero / Ambientação</span>
                         <select
-                          className="form-input form-select"
-                          value={systemGenre}
-                          onChange={(event) =>
-                            setSystemGenre(event.target.value)
-                          }
+                          className="form-input"
+                          value={genre}
+                          onChange={(event) => setGenre(event.target.value)}
                         >
-                          {genres.map((genre) => (
-                            <option key={genre} value={genre}>
-                              {genre}
-                            </option>
+                          {genres.map((item) => (
+                            <option key={item}>{item}</option>
                           ))}
                         </select>
                       </label>
 
                       <label className="form-field">
-                        <span>Sistema de dados principal</span>
+                        <span>Dado principal</span>
                         <select
-                          className="form-input form-select"
-                          value={systemDice}
-                          onChange={(event) =>
-                            setSystemDice(event.target.value)
-                          }
+                          className="form-input"
+                          value={dice}
+                          onChange={(event) => setDice(event.target.value)}
                         >
-                          {diceOptions.map((dice) => (
-                            <option key={dice} value={dice}>
-                              {dice}
-                            </option>
+                          {diceOptions.map((item) => (
+                            <option key={item}>{item}</option>
                           ))}
-    
+                        </select>
+                      </label>
+                    </div>
+
+                    <div className="form-divider" />
+
+                    <FormHeading number="03" title="Visibilidade" />
+
+                    <div className="visibility-options">
+                      <button
+                        type="button"
+                        className={`visibility-option ${
+                          visibility === "Privado" ? "selected" : ""
+                        }`}
+                        onClick={() => setVisibility("Privado")}
+                      >
+                        <span className="visibility-icon">♙</span>
+                        <strong>Privado</strong>
+                        <small>
+                          Somente você poderá acessar neste navegador.
+                        </small>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={`visibility-option ${
+                          visibility === "Público" ? "selected" : ""
+                        }`}
+                        onClick={() => setVisibility("Público")}
+                      >
+                        <span className="visibility-icon">◎</span>
+                        <strong>Público</strong>
+                        <small>
+                          Preparado para compartilhamento futuro.
+                        </small>
+                      </button>
+                    </div>
+
+                    <div className="form-notice">
+                      <span>ⓘ</span>
+                      <p>
+                        Os sistemas são salvos apenas neste navegador.
+                        Publicação pública e sincronização ainda não estão
+                        disponíveis.
+                      </p>
+                    </di
